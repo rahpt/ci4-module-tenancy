@@ -8,12 +8,21 @@
         "codeigniter4",
         "modules",
         "tenancy",
-        "multi-tenant"
+        "multi-tenant",
+        "rahpt"
     ],
+    "homepage": "https://github.com/rahpt/ci4-module-tenancy",
+    "support": {
+        "issues": "https://github.com/rahpt/ci4-module-tenancy/issues",
+        "source": "https://github.com/rahpt/ci4-module-tenancy",
+        "docs": "https://github.com/rahpt/ci4-module-tenancy#readme"
+    },
     "authors": [
         {
             "name": "Rahpt",
-            "email": "dev@example.com"
+            "email": "ci4-module@rah.pt",
+            "homepage": "https://github.com/rahpt",
+            "role": "Developer"
         }
     ],
     "require": {
@@ -29,11 +38,22 @@
             "src/Helpers/tenant_helper.php"
         ]
     },
+    "autoload-dev": {
+        "psr-4": {
+            "Rahpt\\Ci4ModuleTenancy\\Tests\\": "tests/"
+        }
+    },
+    "scripts": {
+        "test": "phpunit",
+        "test:coverage": "phpunit --coverage-html build/coverage"
+    },
     "extra": {
         "codeigniter4": {
             "discover": [
                 "Rahpt\\Ci4ModuleTenancy\\Config\\Registrar"
             ]
         }
-    }
+    },
+    "minimum-stability": "stable",
+    "prefer-stable": true
 }

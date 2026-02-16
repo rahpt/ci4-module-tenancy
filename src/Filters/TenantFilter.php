@@ -5,7 +5,7 @@ namespace Rahpt\Ci4ModuleTenancy\Filters;
 use CodeIgniter\Filters\FilterInterface;
 use CodeIgniter\HTTP\RequestInterface;
 use CodeIgniter\HTTP\ResponseInterface;
-use Rahpt\Ci4ModuleTenancy\Tenancy\TenantContext;
+use Rahpt\Ci4ModuleTenancy\TenantContext;
 use Config\Tenancy as TenancyConfig;
 
 class TenantFilter implements FilterInterface
@@ -36,7 +36,6 @@ class TenantFilter implements FilterInterface
         }
 
         if ($tenantId) {
-            // For now, we set the ID. In a real app, you might want to fetch a Tenant object from DB.
             TenantContext::set($tenantId);
         } elseif ($config->requireTenant) {
             return service('response')->setStatusCode(403, 'Tenant Required');

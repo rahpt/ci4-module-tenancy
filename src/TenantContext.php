@@ -1,6 +1,6 @@
 <?php
 
-namespace Rahpt\Ci4ModuleTenancy\Tenancy;
+namespace Rahpt\Ci4ModuleTenancy;
 
 /**
  * TenantContext - Holds current tenant information globally.

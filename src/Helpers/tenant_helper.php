@@ -1,6 +1,6 @@
 <?php
 
-use Rahpt\Ci4ModuleTenancy\Tenancy\TenantContext;
+use Rahpt\Ci4ModuleTenancy\TenantContext;
 
 if (!function_exists('tenant')) {
     /**

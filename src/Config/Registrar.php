@@ -3,7 +3,7 @@
 namespace Rahpt\Ci4ModuleTenancy\Config;
 
 /**
- * Registrar for Tenancy Package
+ * Registrar - Autoconfiguração de componentes do pacote ci4-module-tenancy no CodeIgniter 4.
  */
 class Registrar
 {

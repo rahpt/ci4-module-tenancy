@@ -1,6 +1,6 @@
 # CodeIgniter 4 Module Tenancy
 
-[![Version](https://img.shields.io/badge/version-1.0.1-blue.svg)](https://github.com/rahpt/ci4-module-tenancy)
+[![Version](https://img.shields.io/badge/version-1.1.0-blue.svg)](https://github.com/rahpt/ci4-module-tenancy)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![PHP](https://img.shields.io/badge/php-%3E%3D8.1-brightgreen.svg)](https://php.net)
 
@@ -91,6 +91,20 @@ Se o app estiver em `cliente1.meuapp.com`, o tenant será `cliente1`.
 
 ---
 
+---
+
+## 🕒 Histórico de Versões
+
+### [1.1.0] - 2026-02-16
+- **Arquitetura**: Refatoração do `TenantContext` para o namespace raiz do pacote.
+- **Testes**: Adição de suíte de testes unitários para validação de contexto.
+- **Padronização**: Alinhamento com o ecossistema Rahpt v1.1.0.
+
+### [1.0.1] - 2026-02-15
+- Versão inicial com detecção tripla (subdomain, header, session).
+
+---
+
 ## 📄 Licença
 
 MIT License
@@ -103,5 +117,5 @@ Desenvolvido por **Rahpt**
 
 ---
 
-**Versão**: 1.0.1  
+**Versão**: 1.1.0  
 **Última Atualização**: 2026-02-16
