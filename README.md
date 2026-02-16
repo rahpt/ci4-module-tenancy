@@ -91,8 +91,6 @@ Se o app estiver em `cliente1.meuapp.com`, o tenant será `cliente1`.
 
 ---
 
----
-
 ## 🕒 Histórico de Versões
 
 ### [1.1.0] - 2026-02-16
