@@ -1,0 +1,39 @@
+{
+    "name": "rahpt/ci4-module-tenancy",
+    "description": "Multi-tenancy support for CodeIgniter 4 modules",
+    "type": "library",
+    "license": "MIT",
+    "keywords": [
+        "codeigniter",
+        "codeigniter4",
+        "modules",
+        "tenancy",
+        "multi-tenant"
+    ],
+    "authors": [
+        {
+            "name": "Rahpt",
+            "email": "dev@example.com"
+        }
+    ],
+    "require": {
+        "php": "^8.1",
+        "codeigniter4/framework": "^4.5",
+        "rahpt/ci4-module": "*"
+    },
+    "autoload": {
+        "psr-4": {
+            "Rahpt\\Ci4ModuleTenancy\\": "src/"
+        },
+        "files": [
+            "src/Helpers/tenant_helper.php"
+        ]
+    },
+    "extra": {
+        "codeigniter4": {
+            "discover": [
+                "Rahpt\\Ci4ModuleTenancy\\Config\\Registrar"
+            ]
+        }
+    }
+}
