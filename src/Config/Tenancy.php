@@ -23,7 +23,30 @@ class Tenancy extends BaseConfig
     public string $headerName = 'X-Tenant-ID';
 
     /**
-     * Whether to throw an exception if no tenant is detected.
+     * Whether to throw an HTTP 403 response if no tenant is detected.
      */
     public bool $requireTenant = false;
+
+    /**
+     * When true, verifies that an authenticated user actually belongs to the resolved tenant
+     * before activating the TenantContext. Highly recommended for multi-tenant SaaS.
+     */
+    public bool $validateMembership = false;
+
+    /**
+     * Optional custom callback or class string implementing membership check.
+     * Signature: fn(\CodeIgniter\Shield\Entities\User|object $user, string $tenantId): bool
+     */
+    public ?string $membershipHandler = null;
+
+    /**
+     * Optional allowlist of permitted tenant IDs/slugs. Empty array allows all validated tenants.
+     * @var array<string>
+     */
+    public array $allowedTenants = [];
+
+    /**
+     * Strict format validation for tenant IDs (alphanumeric, dashes, underscores only).
+     */
+    public bool $strictTenantValidation = true;
 }
