@@ -24,8 +24,9 @@ class Tenancy extends BaseConfig
 
     /**
      * Whether to throw an HTTP 403 response if no tenant is detected.
+     * Default true for SaaS multi-tenant isolation.
      */
-    public bool $requireTenant = false;
+    public bool $requireTenant = true;
 
     /**
      * When true, verifies that an authenticated user actually belongs to the resolved tenant

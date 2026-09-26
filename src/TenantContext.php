@@ -147,14 +147,24 @@ class TenantContext
             throw new \InvalidArgumentException('A specific reason must be provided to run in global tenant scope.');
         }
 
-        if ($capability !== null && function_exists('auth') && auth()->loggedIn()) {
-            $user = auth()->user();
-            if ($user && !$user->can($capability)) {
-                throw new RuntimeException("Unauthorized: user lacks capability [{$capability}] required for global tenant scope.");
+        $userId = 'system';
+        if (function_exists('auth')) {
+            try {
+                if (auth()->loggedIn()) {
+                    $user = auth()->user();
+                    $userId = $user ? (string) $user->id : 'system';
+                    if ($capability !== null && $user && !$user->can($capability)) {
+                        throw new SecurityException("Unauthorized: user lacks capability [{$capability}] required for global tenant scope.");
+                    }
+                }
+            } catch (SecurityException $se) {
+                throw $se;
+            } catch (\Throwable) {
+                // Database or session not yet initialized; fallback to system actor
+                $userId = 'system';
             }
         }
 
-        $userId = function_exists('auth') && auth()->user() ? auth()->user()->id : 'system';
         log_message('notice', sprintf('[TenantAudit] Global scope granted for user [%s]. Reason: %s', $userId, $reason));
 
         $previousGlobal = self::$globalScopeActive;
@@ -165,5 +175,24 @@ class TenantContext
         } finally {
             self::$globalScopeActive = $previousGlobal;
         }
+    }
+
+    /**
+     * Safely executes an administrative or system maintenance operation across tenants
+     * with an immutable audit log entry (actor, tenant, reason, timestamp).
+     *
+     * @template T
+     * @param callable(): T $callback
+     * @param string $reason Audit explanation
+     * @param string $actor System, CLI command, or user identity
+     * @return T
+     */
+    public static function runSystem(callable $callback, string $reason, string $actor = 'system'): mixed
+    {
+        $tenantId = self::id() ?? 'none';
+        $timestamp = date('c');
+        log_message('notice', sprintf('[TenantAudit] runSystem invoked | Actor: %s | ActiveTenant: %s | Reason: %s | Timestamp: %s', $actor, $tenantId, $reason, $timestamp));
+
+        return self::runGlobal($callback, $reason);
     }
 }
