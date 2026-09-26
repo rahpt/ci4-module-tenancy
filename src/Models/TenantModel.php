@@ -107,6 +107,10 @@ abstract class TenantModel extends Model
 
     /**
      * Hook applied before inserting a new record. Automatically assigns tenant_id.
+     *
+     * Security: any tenant_id present in input data is IGNORED and replaced with
+     * the authoritative value from TenantContext. This prevents mass-assignment
+     * attacks where a user could inject an arbitrary tenant_id into the request.
      */
     protected function applyTenantScopeOnInsert(array $data): array
     {
@@ -123,6 +127,18 @@ abstract class TenantModel extends Model
         }
 
         if ($tenantId !== null && isset($data['data']) && is_array($data['data'])) {
+            // Strip any user-supplied tenant_id and enforce TenantContext value
+            // This is the critical mass-assignment / IDOR protection
+            if (isset($data['data'][$this->tenantColumn])
+                && (string) $data['data'][$this->tenantColumn] !== (string) $tenantId
+            ) {
+                log_message('warning', sprintf(
+                    '[TenantSecurity] INSERT on [%s]: user-supplied tenant_id [%s] was stripped and replaced with TenantContext [%s].',
+                    static::class,
+                    $data['data'][$this->tenantColumn],
+                    $tenantId
+                ));
+            }
             $data['data'][$this->tenantColumn] = $tenantId;
         }
 
@@ -131,6 +147,9 @@ abstract class TenantModel extends Model
 
     /**
      * Hook applied before updating records. Constrains update to current tenant.
+     *
+     * Security: any attempt to change tenant_id in the update payload is REJECTED.
+     * tenant_id must never change once a record is created.
      */
     protected function applyTenantScopeOnUpdate(array $data): array
     {
@@ -144,6 +163,17 @@ abstract class TenantModel extends Model
             throw new RuntimeException(
                 sprintf('TenantModel [%s] update blocked: tenant context is required but none was set.', static::class)
             );
+        }
+
+        // Block any attempt to change tenant_id via UPDATE payload
+        if (isset($data['data']) && is_array($data['data']) && array_key_exists($this->tenantColumn, $data['data'])) {
+            log_message('critical', sprintf(
+                '[TenantSecurity] UPDATE on [%s]: attempt to change tenant_id column [%s] was blocked. Caller supplied [%s].',
+                static::class,
+                $this->tenantColumn,
+                $data['data'][$this->tenantColumn]
+            ));
+            unset($data['data'][$this->tenantColumn]);
         }
 
         if ($tenantId !== null) {
