@@ -42,10 +42,21 @@ abstract class TenantModel extends Model
     }
 
     /**
-     * Temporarily disables tenant scoping for the current query (e.g., admin scripts, cron tasks).
+     * Temporarily disables tenant scoping for the current query instance.
+     * Requires an explicit reason and records an audit log to prevent accidental bypass.
      */
-    public function withoutTenantScope(): static
+    public function withoutTenantScope(?string $reason = null, ?string $capability = null): static
     {
+        if ($capability !== null && function_exists('auth') && auth()->loggedIn()) {
+            $user = auth()->user();
+            if ($user && !$user->can($capability)) {
+                throw new RuntimeException("Unauthorized: user lacks capability [{$capability}] to bypass tenant scope.");
+            }
+        }
+
+        $auditReason = $reason ?? 'Unspecified programmatic bypass';
+        log_message('warning', sprintf('[TenantSecurity] Model [%s] tenant scoping bypassed. Reason: %s', static::class, $auditReason));
+
         $this->tenantScopeActive = false;
         return $this;
     }
@@ -72,7 +83,8 @@ abstract class TenantModel extends Model
      */
     protected function applyTenantScopeOnFind(array $data): array
     {
-        if (!$this->tenantScopeActive) {
+        // Bypass if instance-scoped off or globally granted
+        if (!$this->tenantScopeActive || TenantContext::isGlobal()) {
             return $data;
         }
 
@@ -98,7 +110,7 @@ abstract class TenantModel extends Model
      */
     protected function applyTenantScopeOnInsert(array $data): array
     {
-        if (!$this->tenantScopeActive) {
+        if (!$this->tenantScopeActive || TenantContext::isGlobal()) {
             return $data;
         }
 
@@ -122,7 +134,7 @@ abstract class TenantModel extends Model
      */
     protected function applyTenantScopeOnUpdate(array $data): array
     {
-        if (!$this->tenantScopeActive) {
+        if (!$this->tenantScopeActive || TenantContext::isGlobal()) {
             return $data;
         }
 
@@ -147,7 +159,7 @@ abstract class TenantModel extends Model
      */
     protected function applyTenantScopeOnDelete(array $data): array
     {
-        if (!$this->tenantScopeActive) {
+        if (!$this->tenantScopeActive || TenantContext::isGlobal()) {
             return $data;
         }
 

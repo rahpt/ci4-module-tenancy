@@ -51,13 +51,15 @@ class TenantFilter implements FilterInterface
         // 3. User Membership validation (Zero-Trust header/subdomain verification)
         if ($tenantId !== null && $config->validateMembership) {
             if (!$this->validateUserMembership($tenantId, $config)) {
+                $userId = function_exists('auth') && auth()->user() ? auth()->user()->id : 'unauthenticated';
+                log_message('warning', sprintf('[TenantSecurity] Access denied: user [%s] is not an authorized member of tenant [%s] via [%s]', $userId, $tenantId, $config->detectionMode));
                 return service('response')->setStatusCode(403, 'Access to requested tenant is unauthorized for current user');
             }
         }
 
-        // 4. Activate TenantContext or enforce requirement
+        // 4. Activate TenantContext with resolution source or enforce requirement
         if ($tenantId !== null && $tenantId !== '') {
-            TenantContext::set($tenantId);
+            TenantContext::set($tenantId, $config->detectionMode);
         } elseif ($config->requireTenant) {
             return service('response')->setStatusCode(403, 'Tenant Required');
         }
@@ -79,8 +81,16 @@ class TenantFilter implements FilterInterface
         }
 
         // Custom membership handler class or callable
-        if (!empty($config->membershipHandler) && is_callable($config->membershipHandler)) {
-            return (bool) call_user_func($config->membershipHandler, $user, $tenantId);
+        if (!empty($config->membershipHandler)) {
+            if (is_string($config->membershipHandler) && class_exists($config->membershipHandler)) {
+                $handler = new $config->membershipHandler();
+                if ($handler instanceof \Rahpt\Ci4ModuleTenancy\Contracts\TenantMembershipInterface) {
+                    return $handler->userBelongsToTenant($user, $tenantId);
+                }
+            }
+            if (is_callable($config->membershipHandler)) {
+                return (bool) call_user_func($config->membershipHandler, $user, $tenantId);
+            }
         }
 
         // Check if user entity has an inTenant() method

@@ -29,13 +29,15 @@ class Tenancy extends BaseConfig
 
     /**
      * When true, verifies that an authenticated user actually belongs to the resolved tenant
-     * before activating the TenantContext. Highly recommended for multi-tenant SaaS.
+     * before activating the TenantContext (Zero-Trust header/subdomain verification).
+     * Enabled by default for multi-tenant SaaS security.
      */
-    public bool $validateMembership = false;
+    public bool $validateMembership = true;
 
     /**
-     * Optional custom callback or class string implementing membership check.
+     * Optional custom callback or class implementing \Rahpt\Ci4ModuleTenancy\Contracts\TenantMembershipInterface.
      * Signature: fn(\CodeIgniter\Shield\Entities\User|object $user, string $tenantId): bool
+     * Or class string implementing TenantMembershipInterface.
      */
     public ?string $membershipHandler = null;
 
